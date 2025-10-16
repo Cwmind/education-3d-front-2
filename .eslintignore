@@ -1,0 +1,42 @@
+/build/
+/config/
+/dist/
+/*.js
+/test/unit/coverage/
+/node_modules/*
+# 忽略若依页面
+/src/views/system
+/src/views/error
+/src/views/monitor
+/src/views/redirect
+/src/views/tool
+# 忽略若依框架组件
+/src/layout
+# 忽略若依组件
+/src/components/Crontab
+/src/components/DictTag
+/src/components/Editor
+/src/components/FileUpload
+/src/components/Hamburger
+/src/components/HeaderSearch
+/src/components/IconSelect
+/src/components/iFrame
+/src/components/ImagePreview
+/src/components/ImageUpload
+/src/components/ParentView
+/src/components/portalLayout
+/src/components/RightToolbar
+/src/components/RuoYi
+/src/components/Screenfull
+/src/components/SizeSelect
+/src/components/SvgIcon
+/src/components/TopNav
+# 忽略若依js
+/src/utils
+# 忽略若依vuex
+/src/store/modules/app.js
+/src/store/modules/dict.js
+/src/store/modules/permission.js
+/src/store/modules/settings.js
+/src/store/modules/tagsView.js
+/src/store/modules/user.js

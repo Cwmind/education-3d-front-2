@@ -1,0 +1,2 @@
+education-3d-front.7z filter=lfs diff=lfs merge=lfs -text
+public/unity3D/Build/sl313.data filter=lfs diff=lfs merge=lfs -text

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>切片</title>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="班级管理列表" transform="translate(-300.000000, -234.000000)">
+            <g id="编组-12" transform="translate(16.000000, 104.000000)">
+                <g id="编组-11" transform="translate(24.000000, 80.000000)">
+                    <g id="编组-9备份" transform="translate(24.000000, 39.000000)">
+                        <g id="1.Base基础/3.Icon图标/操作/edit" transform="translate(236.000000, 11.000000)">
+                            <rect id="edit-(Background)" opacity="0" x="0" y="0" width="16" height="16"></rect>
+                            <path d="M14.125309,4.98033142 L14.8324165,4.27322483 L11.5890379,1.02984619 L10.8819304,1.73695302 L14.125309,4.98033142 Z M5.96512747,13.140645 L13.2627296,5.84304333 L10.019351,2.59966433 L2.72174895,9.89726639 L1.99915673,13.5102282 C1.95717307,13.7201452 2.14224982,13.90522 2.35216591,13.8632374 L5.96512747,13.140645 Z M11.8485165,5.84304333 L5.47211528,12.2194433 L3.18565893,12.6767349 L3.6429503,10.3902788 L10.019351,4.01387763 L11.8485165,5.84304333 Z" id="edit" fill-opacity="0.9" fill="#000000"></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,97 @@
+@mixin clearfix {
+  &::after {
+    display: table;
+    clear: both;
+    content: "";
+  }
+}
+
+@mixin scrollBar {
+  &::-webkit-scrollbar-track-piece {
+    background: #d3dce6;
+  }
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #99a9bf;
+    border-radius: 20px;
+  }
+}
+
+@mixin relative {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+@mixin pct($pct) {
+  position: relative;
+  width: #{$pct};
+  margin: 0 auto;
+}
+
+@mixin triangle($width, $height, $color, $direction) {
+  $width: $width / 2;
+  $color-border-style: $height solid $color;
+  $transparent-border-style: $width solid transparent;
+
+  @if $direction == up {
+    border-right: $transparent-border-style;
+    border-bottom: $color-border-style;
+    border-left: $transparent-border-style;
+  } @else if $direction == right {
+    border-top: $transparent-border-style;
+    border-bottom: $transparent-border-style;
+    border-left: $color-border-style;
+  } @else if $direction == down {
+    border-top: $color-border-style;
+    border-right: $transparent-border-style;
+    border-left: $transparent-border-style;
+  } @else if $direction == left {
+    border-top: $transparent-border-style;
+    border-right: $color-border-style;
+    border-bottom: $transparent-border-style;
+  }
+
+  width: 0;
+  height: 0;
+}
+
+
+// eg mt10 -> margin-top:10px
+$gapArr: 0,4,8,10,12,16,20,24,28,18,30,32,36,40;
+@each $item in $gapArr {
+  .mt#{$item} {
+    margin-top: #{$item}px;
+  }
+
+  .mb#{$item} {
+    margin-bottom: #{$item}px;
+  }
+
+  .mr#{$item} {
+    margin-right: #{$item}px;
+  }
+
+  .ml#{$item} {
+    margin-left: #{$item}px;
+  }
+  .pt#{$item} {
+    padding-top: #{$item}px;
+  }
+
+  .pb#{$item} {
+    padding-bottom: #{$item}px;
+  }
+
+  .pr#{$item} {
+    padding-right: #{$item}px;
+  }
+
+  .pl#{$item} {
+    padding-left: #{$item}px;
+  }
+}

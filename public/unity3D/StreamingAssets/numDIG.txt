@@ -1,0 +1,8 @@
+{
+	"value":
+	[
+		{"reqCode": "Equipment","value":"5"},
+		{"reqCode": "IndustrialModel","value":"10"},
+		{"reqCode": "CollectPoint","value":"8"}
+	]
+}

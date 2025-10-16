@@ -1,0 +1,33 @@
+/**
+ * width      宽
+ * height     高
+ * bgc        背景颜色
+ * isFlat       是否启用拉伸模式
+ * delay      自适应缩放防抖延迟时间（ms）
+ */
+export default {
+  width: {
+    type: Number,
+    default: 1920
+  },
+  height: {
+    type: Number,
+    default: 1080
+  },
+  bgc: {
+    type: String,
+    default: 'transparent'
+  },
+  delay: {
+    type: Number,
+    default: 100
+  },
+  isFlat: {
+    type: Boolean,
+    default: false
+  },
+  noScale: {
+    type: Boolean,
+    default: false
+  }
+}

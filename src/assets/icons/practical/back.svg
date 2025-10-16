@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>编组</title>
+    <g id="新配色" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="实训教学-合浆工序全屏发起考试" transform="translate(-32.000000, -32.000000)" fill="#FFFFFF">
+            <g id="编组-3备份" transform="translate(24.000000, 24.000000)">
+                <g id="编组" transform="translate(16.000000, 16.000000) rotate(90.000000) translate(-16.000000, -16.000000) translate(8.000000, 8.000000)">
+                    <rect id="矩形" fill-opacity="0" x="0" y="0" width="16" height="16"></rect>
+                    <polygon id="路径" fill-opacity="0.9" fill-rule="nonzero" points="3.2 6.51923 4.11924 5.6 7.65962 9.14038 11.20002 5.6 12.11922 6.51923 7.65962 10.97889"></polygon>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
