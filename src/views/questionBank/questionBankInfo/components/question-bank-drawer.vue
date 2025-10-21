@@ -1,4 +1,5 @@
 <template>
+  <!-- 试题新增/编辑抽屉 -->
   <el-drawer
     v-model="drawerVisible"
     :close-on-click-modal="false"
@@ -15,6 +16,7 @@
       label-position="top"
       require-asterisk-position="right"
     >
+      <!-- 试题信息表单 -->
       <el-row :gutter="20">
         <el-col :span="10">
           <el-form-item label="种类" prop="courseType">
@@ -94,6 +96,54 @@
           </el-form-item>
         </el-col>
       </el-row>
+
+      <!-- 已选知识点显示区域 -->
+      <el-row v-if="selectedKnowledge.length > 0" :gutter="20" class="selected-knowledge-section">
+        <el-col :span="20">
+          <div class="selected-knowledge">
+            <div class="selected-knowledge-title">已选知识点：</div>
+            <div class="selected-knowledge-tags">
+              <el-tag
+                v-for="item in selectedKnowledge"
+                :key="item.id"
+                closable
+                class="knowledge-tag"
+                @close="removeKnowledge(item.id)"
+              >
+                {{ item.chineseName }}
+              </el-tag>
+            </div>
+          </div>
+        </el-col>
+      </el-row>
+
+      <!-- 知识点输入匹配区域 -->
+      <el-row :gutter="20" class="knowledge-input-section">
+        <el-col :span="20">
+          <div class="knowledge-input">
+            <input
+              v-model="keyword"
+              placeholder="输入知识点关键词..."
+              @input="handleInput"
+            />
+            <div v-if="showResult" class="match-result">
+              <div
+                v-for="item in allMatches"
+                :key="item.id"
+                class="result-item"
+                @click="toggleKnowledgeSelection(item)"
+              >
+                {{ item.chineseName }}
+                <span class="match-type">
+                  {{ item.matchType === '前缀' ? '(前缀)' : `(${item.similarity.toFixed(2)})` }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </el-col>
+      </el-row>
+
+      <!-- 选项编辑 -->
       <el-row :gutter="20">
         <el-col :span="20">
           <div class="option-edit">
@@ -144,6 +194,8 @@
           </el-row>
         </el-col>
       </el-row>
+
+      <!-- 答案解析 -->
       <el-row :gutter="20">
         <el-col :span="20">
           <el-form-item label="答案解析" prop="answerAnalyze">
@@ -167,7 +219,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getLetter, deepClone } from '@/utils/index'
 import getQuestionTypeOption from '@/hooks/questionTypeOption'
@@ -177,6 +229,7 @@ import {
   requestQuestionBankEdit
 } from '@/api/questionBank/questionBankInfo'
 
+// 试题新增/编辑功能
 const { questionTypeOption } = getQuestionTypeOption()
 const emit = defineEmits(['refresh-list'])
 
@@ -368,7 +421,13 @@ async function addQuestionBank() {
       optionList: options,
       correct,
       answerAnalyze: questionBankForm.value.answerAnalyze,
-      labelList: questionBankForm.value.labelList
+      labelList: questionBankForm.value.labelList,
+      knowledgeList: selectedKnowledge.value.map(item => ({
+        id: item.id,
+        chineseName: item.chineseName,
+        matchType: item.matchType,
+        similarity: item.similarity
+      }))
     }
     const result = await requestQuestionBankAdd(params)
     const { code } = result
@@ -409,7 +468,13 @@ async function editQuestionBank() {
       optionList: options,
       correct,
       answerAnalyze: questionBankForm.value.answerAnalyze,
-      labelList: questionBankForm.value.labelList
+      labelList: questionBankForm.value.labelList,
+      knowledgeList: selectedKnowledge.value.map(item => ({
+        id: item.id,
+        chineseName: item.chineseName,
+        matchType: item.matchType,
+        similarity: item.similarity
+      }))
     }
     const result = await requestQuestionBankEdit(params)
     const { code } = result
@@ -441,7 +506,107 @@ function handleCancel() {
   drawerVisible.value = false
   questionBankRef.value.resetFields()
   questionBankForm.value.optionList = []
+  // 清空知识点相关状态
+  selectedKnowledge.value = []
+  keyword.value = ''
+  allMatches.value = []
+  showResult.value = false
 }
+
+// 知识点匹配功能
+const keyword = ref('')
+const allMatches = ref([]) // 前缀+语义结果
+const showResult = ref(false)
+const selectedKnowledge = ref([]) // 已选中的知识点
+let webSocket = null // WebSocket实例
+
+// 初始化WebSocket连接
+const initWebSocket = () => {
+  // 连接地址（根据后端部署调整）
+  const wsUrl = `ws://localhost:8001/ws/knowledge-match`
+  webSocket = new WebSocket(wsUrl)
+
+  // 连接建立成功
+  webSocket.onopen = () => {
+    console.log('WebSocket连接已建立')
+  }
+
+  // 接收后端推送的消息
+  webSocket.onmessage = (event) => {
+    const message = JSON.parse(event.data)
+    if (message.type === 'prefix') {
+      // 接收前缀结果，直接展示
+      allMatches.value = message.data.map(item => ({ ...item, matchType: '前缀' }))
+    } else if (message.type === 'semantic') {
+      // 接收语义结果，追加并去重
+      const newItems = message.data.map(item => ({ ...item, matchType: '语义' }))
+      const uniqueMap = new Map()
+      // 先加已有结果，再加新结果（保证前缀优先）
+      allMatches.value.forEach(item => uniqueMap.set(item.id, item))
+      newItems.forEach(item => uniqueMap.set(item.id, item))
+      allMatches.value = Array.from(uniqueMap.values())
+    }
+  }
+
+  // 连接关闭
+  webSocket.onclose = () => {
+    console.log('WebSocket连接已关闭')
+  }
+
+  // 连接错误
+  webSocket.onerror = (error) => {
+    console.error('WebSocket错误：', error)
+  }
+}
+
+// 输入事件处理
+const handleInput = (e) => {
+  const value = e.target.value.trim()
+  keyword.value = value
+  showResult.value = value.length > 0
+
+  if (value.length < 1) {
+    allMatches.value = []
+    return
+  }
+
+  // 向WebSocket发送关键词
+  if (webSocket && webSocket.readyState === WebSocket.OPEN) {
+    webSocket.send(JSON.stringify({ keyword: value }))
+  }
+}
+
+// 切换知识点选择状态
+const toggleKnowledgeSelection = (item) => {
+  const index = selectedKnowledge.value.findIndex(selected => selected.id === item.id)
+  if (index > -1) {
+    // 如果已选中，则取消选择
+    selectedKnowledge.value.splice(index, 1)
+  } else {
+    // 如果未选中，则添加到选中列表
+    selectedKnowledge.value.push(item)
+  }
+}
+
+// 移除知识点
+const removeKnowledge = (id) => {
+  const index = selectedKnowledge.value.findIndex(item => item.id === id)
+  if (index > -1) {
+    selectedKnowledge.value.splice(index, 1)
+  }
+}
+
+// 组件挂载时初始化连接
+onMounted(() => {
+  initWebSocket()
+})
+
+// 组件卸载时关闭连接
+onUnmounted(() => {
+  if (webSocket) {
+    webSocket.close()
+  }
+})
 
 defineExpose({
   openDrawer
@@ -478,5 +643,97 @@ defineExpose({
 :deep(.el-input-group__prepend) {
   background-color: rgba(243, 243, 243, 0.1);
   padding: 0 23px;
+}
+
+.selected-knowledge-section {
+  margin-top: 16px;
+}
+
+.selected-knowledge {
+  .selected-knowledge-title {
+    font-size: 14px;
+    color: #606266;
+    margin-bottom: 8px;
+  }
+  .selected-knowledge-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    .knowledge-tag {
+      margin: 0;
+    }
+  }
+}
+
+.knowledge-input-section {
+  margin-top: 20px;
+}
+
+.knowledge-input {
+  position: relative;
+  input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #dcdfe6;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+  .match-result {
+    position: absolute;
+    width: 100%;
+    background: #fff;
+    border: 1px solid #dcdfe6;
+    border-radius: 4px;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    .result-item {
+      padding: 8px 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      &:hover {
+        background-color: #f5f7fa;
+      }
+      &.selected {
+        background-color: #e6f7ff;
+        color: #1890ff;
+      }
+      .match-type {
+        color: #909399;
+        font-size: 12px;
+        margin-left: 4px;
+      }
+      .selected-icon {
+        color: #1890ff;
+        font-weight: bold;
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+.selected-knowledge-section {
+  margin-top: 16px;
+}
+
+.selected-knowledge {
+  .selected-knowledge-title {
+    font-size: 14px;
+    color: #606266;
+    margin-bottom: 8px;
+  }
+  .selected-knowledge-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    .knowledge-tag {
+      margin: 0;
+    }
+  }
 }
 </style>
