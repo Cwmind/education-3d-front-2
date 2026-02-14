@@ -62,7 +62,7 @@
                   <div class="text-ellipsis">{{ scope.row.content }}</div>
                 </template>
               </el-table-column>
-              <el-table-column label="下一工作日计划" prop="nextPlan" min-width="450" >
+              <el-table-column label="下一工作日计划" prop="nextPlan" min-width="450">
                 <template #default="scope">
                   <div class="text-ellipsis">{{ scope.row.nextPlan }}</div>
                 </template>

@@ -92,6 +92,9 @@
             </div>
             <div v-hasRole="TEACHER" class="basic-result__header--right">
               <el-button type="primary" icon="Plus" @click="handleStartExamAdd">新增</el-button>
+              <el-button type="success" icon="MagicStick" @click="handleIntelligentExam">
+                智能组卷
+              </el-button>
             </div>
           </div>
           <el-table v-loading="queryLoading" :data="queryDataList" height="100%">
@@ -158,6 +161,11 @@
       </el-card>
     </template>
     <start-exam-drawer ref="startExamDrawerRef" @refresh-list="handleRefreshList" />
+    <intelligent-exam-dialog
+      v-model:visible="intelligentExamVisible"
+      :classes-list="classesList"
+      @success="handleRefreshList"
+    />
   </BasicPageTopBottom>
 </template>
 
@@ -166,6 +174,7 @@ import { ref, onMounted } from 'vue'
 import { TEACHER } from '@/config/rolesConfig'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import StartExamDrawer from './start-exam-drawer.vue'
+import IntelligentExamDialog from '../../examManagement/components/IntelligentExamDialog.vue'
 import { requestStartExamList, requestSelectDataQry, requestExamDelete } from '@/api/exam/startExam'
 
 const emit = defineEmits(['view-detail'])
@@ -297,6 +306,11 @@ function handleRefreshList() {
 const startExamDrawerRef = ref()
 function handleStartExamAdd() {
   startExamDrawerRef.value.openDrawer()
+}
+
+const intelligentExamVisible = ref(false)
+function handleIntelligentExam() {
+  intelligentExamVisible.value = true
 }
 function handleExamDetail(row) {
   emit('view-detail', row)

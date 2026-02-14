@@ -13,10 +13,10 @@
     <div class="basic-search-button">
       <div>
         <slot name="extraButtons"></slot>
-        <el-button v-if="props.showReset" @click="handleReset(queryRef)" :icon="Refresh">
+        <el-button v-if="props.showReset" :icon="Refresh" @click="handleReset(queryRef)">
           重置
         </el-button>
-        <el-button type="primary" @click="handleSearch" :icon="Search">查询</el-button>
+        <el-button type="primary" :icon="Search" @click="handleSearch">查询</el-button>
       </div>
       <div v-if="$slots.expendSearchItems" class="basic-search-expend" @click="toggleExpend">
         <span class="basic-font-14">{{ expend ? '收起' : '展开' }}</span>
