@@ -207,6 +207,13 @@ export const dynamicRoutes = [
         roles: ADMIN_TEACHER,
         component: () => import('@/views/exam/examManagement/index'),
         meta: { title: '考试管理', activeMenu: 'ExamManagement', icon: 'exam-management' }
+      },
+      {
+        path: 'knowledgeGraph',
+        name: 'KnowledgeGraph',
+        roles: ADMIN_TEACHER,
+        component: () => import('@/views/exam/knowledgeGraph/index'),
+        meta: { title: '知识图谱', activeMenu: 'KnowledgeGraph', icon: 'connection' }
       }
     ]
   },
