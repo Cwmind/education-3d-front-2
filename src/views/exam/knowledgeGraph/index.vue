@@ -94,15 +94,15 @@
             <div class="value">
               {{
                 selectedNode.properties?.文字描述 ||
-                selectedNode.properties?.textDescription ||
-                '-'
+                  selectedNode.properties?.textDescription ||
+                  '-'
               }}
             </div>
           </div>
           <div
             v-if="
               (selectedNode.properties?.链接 || selectedNode.properties?.link) &&
-              (selectedNode.properties?.链接 || selectedNode.properties?.link) !== 'null'
+                (selectedNode.properties?.链接 || selectedNode.properties?.link) !== 'null'
             "
             class="info-item"
           >

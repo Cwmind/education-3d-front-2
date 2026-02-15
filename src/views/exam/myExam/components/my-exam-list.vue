@@ -110,7 +110,14 @@
                   >
                     查看详情
                   </el-button>
-                  <el-button v-else type="primary" @click="handleViewDetail(item, 'start')">
+                  <el-button
+                    v-if="computedExamState(item) && showErrorAnalysisBtn(item.examId)"
+                    type="warning"
+                    @click="handleErrorAnalysis(item.examId)"
+                  >
+                    错题分析
+                  </el-button>
+                  <el-button v-else-if="!computedExamState(item)" type="primary" @click="handleViewDetail(item, 'start')">
                     开始考试
                   </el-button>
                 </div>
@@ -141,12 +148,18 @@
 <script setup>
 import { ref } from 'vue'
 import { ElMessage, dayjs } from 'element-plus'
+import { useRouter } from 'vue-router'
 import getScoreLevelOption from '@/hooks/scoreLevelOption'
 import { requestSelectDataQry, requestExamPaperList } from '@/api/exam/myExam'
+import { requestErrorCount } from '@/api/exam/errorAnalysis'
 
 const emit = defineEmits(['view-detail'])
+const router = useRouter()
 const contentLoading = ref(false)
 const { scoreLevelOption } = getScoreLevelOption()
+
+// 错题数量映射表
+const errorCountMap = ref({})
 const queryParams = ref({
   courseType: '',
   courseId: '',
@@ -230,6 +243,8 @@ async function getExamPaperList() {
       const { list, total: listTotal } = response
       queryDataList.value = list
       total.value = listTotal
+      // 查询已完成考试的错题数量
+      await fetchErrorCounts(list)
     } else {
       queryDataList.value = []
       total.value = 0
@@ -239,6 +254,34 @@ async function getExamPaperList() {
     queryDataList.value = []
     total.value = 0
   }
+}
+
+// 查询错题数量
+async function fetchErrorCounts(examList) {
+  errorCountMap.value = {}
+  // 只查询已完成的考试（有分数的）
+  const completedExams = examList.filter(exam => exam.score !== null && exam.score !== undefined)
+  const promises = completedExams.map(async (exam) => {
+    try {
+      const result = await requestErrorCount(exam.examId)
+      if (result.code === 1) {
+        errorCountMap.value[exam.examId] = result.response.errorCount || 0
+      }
+    } catch (error) {
+      console.log('fetchErrorCount error', error)
+    }
+  })
+  await Promise.all(promises)
+}
+
+// 获取错题数量
+function getErrorCount(examId) {
+  return errorCountMap.value[examId] || 0
+}
+
+// 判断是否显示错题分析按钮
+function showErrorAnalysisBtn(examId) {
+  return getErrorCount(examId) > 0
 }
 // 重置筛选条件
 function handleReset() {
@@ -276,6 +319,14 @@ function handleViewDetail(detail, type) {
     }
   }
   emit('view-detail', { detail: detail, type })
+}
+
+// 跳转错题分析
+function handleErrorAnalysis(examId) {
+  router.push({
+    path: '/student/error-analysis',
+    query: { examIds: examId }
+  })
 }
 // 初始化筛选条件
 async function initQueryParams(params) {
@@ -400,7 +451,13 @@ onMounted(() => {
         }
       }
       .item-right__btn {
+        display: flex;
+        gap: 8px;
         :deep(.el-button--primary) {
+          width: 96px;
+          border-radius: 4px;
+        }
+        :deep(.el-button--warning) {
           width: 96px;
           border-radius: 4px;
         }

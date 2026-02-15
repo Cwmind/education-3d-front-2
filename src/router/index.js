@@ -1,4 +1,4 @@
-import { ADMIN, TEACHER, STUDENT, ADMIN_TEACHER, ALLROLES } from '@/config/rolesConfig'
+import { ADMIN, TEACHER, STUDENT, ADMIN_TEACHER } from '@/config/rolesConfig'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import Layout from '@/layout'
 
@@ -230,6 +230,7 @@ export const dynamicRoutes = [
         component: () => import('@/views/exam/myExam/index'),
         roles: STUDENT
       }
+      
     ]
   },
   // {
