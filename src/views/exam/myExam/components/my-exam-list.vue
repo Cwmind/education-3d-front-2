@@ -71,6 +71,18 @@
     <template #content>
       <el-card shadow="never" body-class="my-exam-list" class="basic-table-card">
         <div class="height-100 basic-result">
+          <!-- 查询结果操作栏 -->
+          <div v-if="queryDataList.length > 0" class="result-actions">
+            <el-button
+              type="success"
+              icon="Document"
+              :disabled="!canAnalyzeQueryResult"
+              @click="handleAnalyzeQueryResult"
+            >
+              查询结果错题分析 ({{ completedExamsWithErrors.length }}场考试, {{ totalQueryErrors }}题错题)
+            </el-button>
+          </div>
+
           <div
             v-if="queryDataList.length > 0"
             v-loading="contentLoading"
@@ -283,6 +295,41 @@ function getErrorCount(examId) {
 function showErrorAnalysisBtn(examId) {
   return getErrorCount(examId) > 0
 }
+
+// 计算当前查询结果中有错题的已完成考试
+const completedExamsWithErrors = computed(() => {
+  return queryDataList.value.filter(exam => {
+    const isCompleted = exam.score !== null && exam.score !== undefined
+    const hasErrors = getErrorCount(exam.examId) > 0
+    return isCompleted && hasErrors
+  })
+})
+
+// 计算查询结果的总错题数
+const totalQueryErrors = computed(() => {
+  return completedExamsWithErrors.value.reduce((sum, exam) => {
+    return sum + getErrorCount(exam.examId)
+  }, 0)
+})
+
+// 判断是否可以对查询结果进行错题分析
+const canAnalyzeQueryResult = computed(() => {
+  return completedExamsWithErrors.value.length > 0 && totalQueryErrors.value > 0
+})
+
+// 对查询结果进行错题分析
+function handleAnalyzeQueryResult() {
+  if (!canAnalyzeQueryResult.value) {
+    ElMessage.warning('当前查询结果中没有可分析的错题')
+    return
+  }
+
+  const examIds = completedExamsWithErrors.value.map(exam => exam.examId)
+  router.push({
+    path: '/student/error-analysis',
+    query: { examIds: examIds.join(',') }
+  })
+}
 // 重置筛选条件
 function handleReset() {
   queryParams.value = {
@@ -367,6 +414,12 @@ onMounted(() => {
     height: 4px;
     background: linear-gradient(90deg, #e95520 0%, rgba(255, 255, 255, 0) 100%);
   }
+}
+.result-actions {
+  padding: 16px 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
 }
 .basic-result__body {
   flex: 1;

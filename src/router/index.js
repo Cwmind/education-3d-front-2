@@ -230,7 +230,20 @@ export const dynamicRoutes = [
         component: () => import('@/views/exam/myExam/index'),
         roles: STUDENT
       }
-      
+    ]
+  },
+  {
+    path: '/student',
+    component: Layout,
+    meta: { hidden: true },
+    children: [
+      {
+        path: 'error-analysis',
+        name: 'StudentErrorAnalysis',
+        roles: STUDENT,
+        component: () => import('@/views/student/errorAnalysis/index'),
+        meta: { title: '错题分析', activeMenu: 'MyExam' }
+      }
     ]
   },
   // {
