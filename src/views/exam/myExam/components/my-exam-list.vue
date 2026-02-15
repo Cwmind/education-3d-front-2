@@ -74,6 +74,34 @@
           <!-- 查询结果操作栏 -->
           <div v-if="queryDataList.length > 0" class="result-actions">
             <el-button
+              v-if="!batchAnalysisMode"
+              type="primary"
+              icon="Select"
+              @click="startBatchAnalysisMode"
+            >
+              综合错题分析
+            </el-button>
+            <template v-else>
+              <div class="batch-mode-info">
+                <span>已选择 {{ selectedExamsForAnalysis.length }} 场考试，共 {{ selectedTotalErrors }} 题错题</span>
+              </div>
+              <el-button
+                type="success"
+                icon="Check"
+                :disabled="selectedExamsForAnalysis.length === 0"
+                @click="confirmBatchAnalysis"
+              >
+                确认分析
+              </el-button>
+              <el-button
+                icon="Close"
+                @click="cancelBatchAnalysisMode"
+              >
+                取消
+              </el-button>
+            </template>
+            <el-button
+              v-if="!batchAnalysisMode"
               type="success"
               icon="Document"
               :disabled="!canAnalyzeQueryResult"
@@ -88,7 +116,16 @@
             v-loading="contentLoading"
             class="basic-result__body"
           >
-            <div v-for="item in queryDataList" :key="item.examId" class="basic-result__body__item">
+            <div
+              v-for="item in queryDataList"
+              :key="item.examId"
+              class="basic-result__body__item"
+              :class="{
+                'selectable': batchAnalysisMode && computedExamState(item) && showErrorAnalysisBtn(item.examId),
+                'selected': isExamSelected(item.examId)
+              }"
+              @click="batchAnalysisMode && toggleExamSelection(item)"
+            >
               <div class="item-left">
                 <div v-if="computedExamState(item)" class="item-left__score">
                   <div :class="computedScoreClass(item)">
@@ -172,6 +209,10 @@ const { scoreLevelOption } = getScoreLevelOption()
 
 // 错题数量映射表
 const errorCountMap = ref({})
+
+// 综合错题分析模式
+const batchAnalysisMode = ref(false)
+const selectedExamsForAnalysis = ref([])
 const queryParams = ref({
   courseType: '',
   courseId: '',
@@ -330,6 +371,74 @@ function handleAnalyzeQueryResult() {
     query: { examIds: examIds.join(',') }
   })
 }
+
+// 开启综合错题分析模式
+function startBatchAnalysisMode() {
+  batchAnalysisMode.value = true
+  selectedExamsForAnalysis.value = []
+}
+
+// 取消综合错题分析模式
+function cancelBatchAnalysisMode() {
+  batchAnalysisMode.value = false
+  selectedExamsForAnalysis.value = []
+}
+
+// 切换考试选中状态
+function toggleExamSelection(exam) {
+  if (!batchAnalysisMode.value) return
+
+  // 只能选择已完成且有错题的考试
+  const isCompleted = exam.score !== null && exam.score !== undefined
+  const hasErrors = getErrorCount(exam.examId) > 0
+
+  if (!isCompleted || !hasErrors) {
+    ElMessage.warning('只能选择已完成且有错题的考试')
+    return
+  }
+
+  const index = selectedExamsForAnalysis.value.findIndex(e => e.examId === exam.examId)
+  if (index > -1) {
+    selectedExamsForAnalysis.value.splice(index, 1)
+  } else {
+    selectedExamsForAnalysis.value.push(exam)
+  }
+}
+
+// 判断考试是否被选中
+function isExamSelected(examId) {
+  return selectedExamsForAnalysis.value.some(e => e.examId === examId)
+}
+
+// 计算选中考试的总错题数
+const selectedTotalErrors = computed(() => {
+  return selectedExamsForAnalysis.value.reduce((sum, exam) => {
+    return sum + getErrorCount(exam.examId)
+  }, 0)
+})
+
+// 确认批量分析
+function confirmBatchAnalysis() {
+  if (selectedExamsForAnalysis.value.length === 0) {
+    ElMessage.warning('请至少选择一场考试')
+    return
+  }
+
+  if (selectedTotalErrors.value === 0) {
+    ElMessage.warning('选中的考试没有错题')
+    return
+  }
+
+  const examIds = selectedExamsForAnalysis.value.map(exam => exam.examId)
+  router.push({
+    path: '/student/error-analysis',
+    query: { examIds: examIds.join(',') }
+  })
+
+  // 重置状态
+  batchAnalysisMode.value = false
+  selectedExamsForAnalysis.value = []
+}
 // 重置筛选条件
 function handleReset() {
   queryParams.value = {
@@ -419,7 +528,15 @@ onMounted(() => {
   padding: 16px 0;
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 12px;
+
+  .batch-mode-info {
+    flex: 1;
+    color: #e95520;
+    font-weight: 500;
+    font-size: 14px;
+  }
 }
 .basic-result__body {
   flex: 1;
@@ -435,6 +552,21 @@ onMounted(() => {
     border-radius: 4px;
     padding: 30px 32px 30px 37px;
     display: flex;
+    transition: all 0.3s;
+
+    &.selectable {
+      cursor: pointer;
+      &:hover {
+        box-shadow: 0 4px 12px rgba(233, 85, 32, 0.2);
+        transform: translateY(-2px);
+      }
+    }
+
+    &.selected {
+      border: 2px solid #e95520;
+      box-shadow: 0 4px 12px rgba(233, 85, 32, 0.3);
+      background: #fff5f0;
+    }
     .item-left {
       width: 140px;
       height: 140px;
