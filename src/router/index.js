@@ -29,6 +29,19 @@ export const constantRoutes = [
     path: '/401',
     component: () => import('@/views/error/401'),
     hidden: true
+  },
+  {
+    path: '/student',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: 'error-analysis',
+        name: 'StudentErrorAnalysis',
+        component: () => import('@/views/student/errorAnalysis/index'),
+        meta: { title: '错题分析', activeMenu: 'MyExam' }
+      }
+    ]
   }
   // {
   //   path: '/user',
@@ -221,31 +234,26 @@ export const dynamicRoutes = [
     path: '/myExam',
     name: 'MyExam',
     component: Layout,
-    redirect: '/myExam',
+    redirect: '/myExam/list',
     meta: { title: '我的考试', activeMenu: 'MyExam' },
     children: [
       {
-        path: '/myExam',
-        name: 'MyExam',
+        path: 'list',
+        name: 'MyExamList',
         component: () => import('@/views/exam/myExam/index'),
-        roles: STUDENT
-      }
-    ]
-  },
-  {
-    path: '/student',
-    component: Layout,
-    meta: { hidden: true },
-    children: [
-      {
-        path: 'error-analysis',
-        name: 'StudentErrorAnalysis',
         roles: STUDENT,
-        component: () => import('@/views/student/errorAnalysis/index'),
-        meta: { title: '错题分析', activeMenu: 'MyExam' }
+        meta: { title: '考试列表', activeMenu: 'MyExamList', icon: 'exam-management' }
+      },
+      {
+        path: 'knowledgeGraph',
+        name: 'MyKnowledgeGraph',
+        roles: STUDENT,
+        component: () => import('@/views/exam/knowledgeGraph/index'),
+        meta: { title: '知识图谱', activeMenu: 'MyKnowledgeGraph', icon: 'connection' }
       }
     ]
   },
+  
   // {
   //   path: '/report',
   //   name: 'Report',
