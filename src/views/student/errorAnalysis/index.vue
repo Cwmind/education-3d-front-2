@@ -20,14 +20,15 @@
           </div>
           <div v-if="reportData.weakKnowledgePoints?.length > 0" class="top-selector">
             <span class="selector-label">显示 TOP</span>
-            <el-select v-model="selectedTopN" size="small" style="width: 80px" @change="handleTopNChange">
-              <el-option
-                v-for="n in topOptions"
-                :key="n"
-                :label="n"
-                :value="n"
-              />
-            </el-select>
+            <el-input-number
+              v-model="selectedTopN"
+              :min="1"
+              :max="99"
+              :controls="false"
+              size="small"
+              style="width: 80px"
+              @change="handleTopNChange"
+            />
             <span class="selector-label">个薄弱知识点</span>
           </div>
         </div>
@@ -160,14 +161,24 @@ const reportData = ref({
 
 // TOP 数量选择
 const selectedTopN = ref(3)
-const topOptions = computed(() => {
-  const maxOptions = reportData.value.weakKnowledgePoints?.length || 10
-  const options = []
-  for (let i = 3; i <= Math.min(maxOptions, 10); i++) {
-    options.push(i)
+
+// 验证并更新 TOP 数量
+function handleTopNChange(value) {
+  // 确保是数字
+  const num = parseInt(value)
+  if (isNaN(num)) {
+    selectedTopN.value = 3
+    return
   }
-  return options
-})
+  // 限制范围 1-99
+  if (num < 1) {
+    selectedTopN.value = 1
+  } else if (num > 99) {
+    selectedTopN.value = 99
+  } else {
+    selectedTopN.value = num
+  }
+}
 
 // 展开的知识点ID列表
 const expandedKpIds = ref([])
@@ -179,11 +190,10 @@ const currentKp = ref(null)
 const currentResources = ref({})
 
 // 计算默认显示数量
-function getDefaultTopCount(examCount) {
-  if (examCount === 1) return 3
-  if (examCount <= 5) return 4
-  if (examCount <= 9) return 5
-  return 6
+function getDefaultTopCount(totalErrors) {
+  if (totalErrors <= 8) return 3
+  if (totalErrors <= 12) return 4
+  return 5
 }
 
 // 显示的知识点列表
@@ -211,11 +221,6 @@ function toggleExpand(kpId) {
   } else {
     expandedKpIds.value.push(kpId)
   }
-}
-
-// 处理 TOP 数量变化
-function handleTopNChange() {
-  // 前端切片，无需重新请求
 }
 
 // 查看资源
@@ -256,8 +261,8 @@ async function loadReport() {
     const result = await requestErrorReport({ examIds })
     if (result.code === 1) {
       reportData.value = result.response
-      // 设置默认显示数量
-      const defaultTopN = getDefaultTopCount(reportData.value.examCount || 1)
+      // 设置默认显示数量（根据总错题数）
+      const defaultTopN = getDefaultTopCount(reportData.value.totalErrorCount || 0)
       selectedTopN.value = defaultTopN
     } else {
       ElMessage.error(result.message || '生成报告失败')
