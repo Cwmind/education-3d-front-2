@@ -20,14 +20,14 @@
           </div>
           <div v-if="reportData.weakKnowledgePoints?.length > 0" class="top-selector">
             <span class="selector-label">显示 TOP</span>
-            <el-input-number
-              v-model="selectedTopN"
+            <el-input
+              v-model.number="selectedTopN"
+              type="number"
               :min="1"
               :max="99"
-              :controls="false"
               size="small"
               style="width: 80px"
-              @change="handleTopNChange"
+              @input="handleTopNInput"
             />
             <span class="selector-label">个薄弱知识点</span>
           </div>
@@ -163,20 +163,16 @@ const reportData = ref({
 const selectedTopN = ref(3)
 
 // 验证并更新 TOP 数量
-function handleTopNChange(value) {
+function handleTopNInput(value) {
   // 确保是数字
   const num = parseInt(value)
-  if (isNaN(num)) {
-    selectedTopN.value = 3
+  if (isNaN(num) || num < 1) {
+    selectedTopN.value = 1
     return
   }
   // 限制范围 1-99
-  if (num < 1) {
-    selectedTopN.value = 1
-  } else if (num > 99) {
+  if (num > 99) {
     selectedTopN.value = 99
-  } else {
-    selectedTopN.value = num
   }
 }
 
