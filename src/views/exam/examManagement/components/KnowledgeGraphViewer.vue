@@ -18,27 +18,39 @@
         <el-icon class="close-icon" @click="closeInfoPanel"><Close /></el-icon>
       </div>
       <div class="panel-content">
-        <div class="info-item">
-          <span class="label">分类:</span>
-          <span class="value" :style="{ color: getNodeColor(selectedNode.group) }">
-            {{ getGroupName(selectedNode.group) }}
-          </span>
+        <div class="info-section">
+          <div class="section-title">基本信息</div>
+          <div class="info-item">
+            <span class="label">分类:</span>
+            <span class="value" :style="{ color: getNodeColor(selectedNode.group) }">
+              {{ getGroupName(selectedNode.group) }}
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="label">中文名:</span>
+            <span class="value">{{ selectedNode.properties?.chineseName || '-' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">英文名:</span>
+            <span class="value">{{ selectedNode.properties?.englishName || '-' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">描述:</span>
+            <span class="value">{{ selectedNode.properties?.textDescription || '-' }}</span>
+          </div>
+          <div v-if="selectedNode.properties?.questionCount" class="info-item">
+            <span class="label">题目数量:</span>
+            <span class="value">{{ selectedNode.properties.questionCount }}</span>
+          </div>
         </div>
-        <div class="info-item">
-          <span class="label">中文名:</span>
-          <span class="value">{{ selectedNode.properties?.chineseName || '-' }}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">英文名:</span>
-          <span class="value">{{ selectedNode.properties?.englishName || '-' }}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">描述:</span>
-          <span class="value">{{ selectedNode.properties?.textDescription || '-' }}</span>
-        </div>
-        <div v-if="selectedNode.properties?.questionCount" class="info-item">
-          <span class="label">题目数量:</span>
-          <span class="value">{{ selectedNode.properties.questionCount }}</span>
+
+        <!-- 评论区域 -->
+        <div class="comment-section">
+          <div class="section-title">知识点讨论</div>
+          <knowledge-comment
+            v-if="selectedNode.id"
+            :knowledge-point-id="selectedNode.id"
+          />
         </div>
       </div>
     </div>
@@ -48,6 +60,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { Close } from '@element-plus/icons-vue'
+import KnowledgeComment from '@/components/KnowledgeComment/index.vue'
 
 const props = defineProps({
   graphData: {
@@ -382,7 +395,7 @@ onBeforeUnmount(() => {
   right: 0;
   top: 40px;
   bottom: 0;
-  width: 300px;
+  width: 400px;
   background: white;
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
   z-index: 20;
@@ -398,6 +411,7 @@ onBeforeUnmount(() => {
   border-bottom: 1px solid #dcdfe6;
   font-weight: 500;
   color: #303133;
+  flex-shrink: 0;
 
   .close-icon {
     cursor: pointer;
@@ -412,8 +426,21 @@ onBeforeUnmount(() => {
 
 .panel-content {
   flex: 1;
-  padding: 15px;
   overflow-y: auto;
+}
+
+.info-section {
+  padding: 15px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #303133;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #1890ff;
 }
 
 .info-item {
@@ -432,5 +459,10 @@ onBeforeUnmount(() => {
     color: #303133;
     word-break: break-all;
   }
+}
+
+.comment-section {
+  padding: 0;
+  background: #fafafa;
 }
 </style>

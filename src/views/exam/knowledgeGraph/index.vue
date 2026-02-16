@@ -117,6 +117,15 @@
               </a>
             </div>
           </div>
+
+          <!-- 评论区域 -->
+          <div class="comment-section">
+            <h3>知识点讨论</h3>
+            <knowledge-comment
+              v-if="selectedNode.id"
+              :knowledge-point-id="selectedNode.id"
+            />
+          </div>
         </div>
         <div v-if="selectedEdge" class="info-content">
           <h3>关系属性</h3>
@@ -151,6 +160,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Close } from '@element-plus/icons-vue'
 import request from '@/utils/request'
+import KnowledgeComment from '@/components/KnowledgeComment/index.vue'
 
 const networkContainer = ref(null)
 const searchKeyword = ref('')
@@ -558,7 +568,7 @@ onBeforeUnmount(() => {
   position: absolute;
   right: 0;
   top: 0;
-  width: 350px;
+  width: 450px;
   height: 100%;
   background: white;
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
@@ -600,6 +610,18 @@ onBeforeUnmount(() => {
       color: #333;
       font-size: 14px;
       word-break: break-all;
+    }
+  }
+
+  .comment-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid #e8e8e8;
+
+    h3 {
+      margin-bottom: 15px;
+      color: #1890ff;
+      padding-right: 0;
     }
   }
 }
